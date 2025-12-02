@@ -73,7 +73,7 @@ public class TelephotoLens implements UsableEquipment {
      */
     @Override
     public @NotNull EquipmentCondition getCondition() {
-        if(this.getDurability() > 80){
+        if(this.getDurability() > 80){g
             return EquipmentCondition.NEW;
         }else if(this.getDurability() > 40){
             return EquipmentCondition.USED;
