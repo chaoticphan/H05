@@ -1,5 +1,6 @@
 package h05.mineable;
 
+import h05.base.AbstractMineable;
 import h05.equipment.Tool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,47 +11,47 @@ import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
  *
  * @author Nhan Huynh, Nico Schnieders
  */
-public class Tree implements Mineable {
+public class Tree extends AbstractMineable implements Mineable {
+
+
+    /**
+     * Create a new Attribute to keep count this tree durability
+     */
+    private double durability;
 
     /**
      * Constructs a new {@link Tree} instance.
      */
     public Tree() {
+        this.setDurability(100);
     }
 
-    @StudentImplementationRequired("H5.3")
-    @Override
-    public @NotNull MiningProgress getProgress() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
 
-    @StudentImplementationRequired("H5.3")
-    @Override
-    public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
 
+
+
+    /**
+     * Return whether the tree has been completely mined or not
+     *
+     * @param tool the tool used for mining, or {@code null} if no tool is used
+     * @return true if the tree has been fully mined, false if not
+     */
     @StudentImplementationRequired("H5.3")
     @Override
     public boolean onMined(@Nullable Tool tool) {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        if(tool == null){
+            this.reduceDurability(7.5);
+        }else if(tool.getName().equals("Pickaxe")){
+            this.reduceDurability(tool.getMiningPower()*3);
+        }else{
+            this.reduceDurability(tool.getMiningPower()*4);
+        }
+        if(this.getDurability()>0){
+            return false;
+        }else{
+            return true;
+        }
     }
 
-    @StudentImplementationRequired("H5.1")
-    @Override
-    public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
 
-    @StudentImplementationRequired("H5.1")
-    @Override
-    public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
-
-    @StudentImplementationRequired("H5.1")
-    @Override
-    public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
 }

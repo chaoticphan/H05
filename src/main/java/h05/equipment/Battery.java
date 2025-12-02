@@ -1,5 +1,7 @@
 package h05.equipment;
 
+import h05.base.AbstractDurable;
+import h05.base.AbstractEquipment;
 import org.jetbrains.annotations.NotNull;
 import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
 
@@ -8,35 +10,18 @@ import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
  *
  * @author Nhan Huynh, Nico Schnieders
  */
-public class Battery implements Equipment {
-
+public class Battery extends AbstractEquipment implements Equipment {
+    /**
+     * Create a new Attribute to keep count this battery durability
+     */
     /**
      * Constructs a new {@link Battery} instance.
      */
     public Battery() {
+        super();
     }
 
-    /**
-     * Increases the durability of this battery by the specified value.
-     *
-     * @param value the value to increase the durability by
-     */
-    @StudentImplementationRequired("H5.2.2")
-    public void increaseDurability(double value) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.2 - remove if implemented
-    }
 
-    @StudentImplementationRequired("H5.2")
-    @Override
-    public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2 - remove if implemented
-    }
-
-    @StudentImplementationRequired("H5.2.1")
-    @Override
-    public @NotNull EquipmentCondition getCondition() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.1 - remove if implemented;
-    }
 
     @Override
     public boolean isUsable() {
@@ -48,21 +33,9 @@ public class Battery implements Equipment {
         return false;
     }
 
-    @StudentImplementationRequired("H5.1")
-    @Override
-    public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
 
-    @StudentImplementationRequired("H5.1")
-    @Override
-    public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
 
-    @StudentImplementationRequired("H5.1")
-    @Override
-    public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
-    }
+
+
+
 }

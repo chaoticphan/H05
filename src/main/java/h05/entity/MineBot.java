@@ -2,14 +2,14 @@ package h05.entity;
 
 import fopbot.Direction;
 import fopbot.Robot;
+import fopbot.Wall;
+import fopbot.World;
 import h05.base.game.GameSettings;
 import h05.base.mineable.BasicInventory;
 import h05.base.mineable.Inventory;
 import h05.base.ui.InfoPopup;
-import h05.equipment.Battery;
-import h05.equipment.Camera;
-import h05.equipment.Equipment;
-import h05.equipment.Tool;
+import h05.equipment.*;
+import h05.mineable.Mineable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.tudalgo.algoutils.student.annotation.DoNotTouch;
@@ -111,22 +111,71 @@ public class MineBot extends Robot implements Miner {
         this(x, y, settings, DEFAULT_CAPACITY);
     }
 
+    /**
+     * Returns all possible coordinates that this miner can see.
+     *
+     * @param x the x-coordinate of the miner to get the vision for
+     * @param y the y-coordinate of the miner to get the vision for
+     * @return an array of points representing the vision of the miner
+     */
     @StudentImplementationRequired("H5.4.2")
     @Override
     public @NotNull Point[] getVision(int x, int y) {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.2 - remove if implemented
+        int visibleRange = this.getCamera().getVisibilityRange();
+        int minX = Math.max(0,x-visibleRange);
+        int maxX = Math.min(World.getWidth()-1 , x + visibleRange);
+        int minY = Math.max(0,y-visibleRange);
+        int maxY = Math.min(World.getHeight()-1 , y + visibleRange);
+        int width = maxX-minX+1;
+        int length = maxY-minY+1;
+        int count = 0;
+        Point[] res = new Point[(width)*(length)];
+        for(int i = minX; i<= maxX; i++) {
+            for(int j = minY; j<= maxY; j++) {
+                res[count] = new Point(i, j);
+                count++;
+            }
+        }
+        return res;
     }
 
+    /**
+     * Updates the vision of the miner based on its new position.
+     *
+     * @param oldX the old x-coordinate of the miner
+     * @param oldY the old y-coordinate of the miner
+     * @param newX the new x-coordinate of the miner
+     * @param newY the new y-coordinate of the miner
+     */
     @StudentImplementationRequired("H5.4.2")
     @Override
     public void updateVision(int oldX, int oldY, int newX, int newY) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.2 - remove if implemented
+        Point[] oldFog = this.getVision(oldX, oldY);
+        Point[] newFog = this.getVision(newX, newY);
+        for(Point point : oldFog) {
+            settings.placeFog(point.x, point.y);
+        }
+        for(Point point : newFog) {
+            settings.removeFog(point.x, point.y);
+        }
     }
 
+    /**
+     * The robot will move forward if the battery is not broken.
+     * After move, the seenable will update.
+     * The battery durability will be reduce = the amount of equipment that the bot has.
+     */
     @StudentImplementationRequired("H5.4.3")
     @Override
     public void move() {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.3 - remove if implemented
+        if(this.getBattery().getCondition()==EquipmentCondition.BROKEN){return;}
+        int oldX = this.getX();
+        int oldY = this.getY();
+        super.move();
+        int newX = this.getX();
+        int newY = this.getY();
+        this.updateVision(oldX, oldY, newX, newY);
+        this.getBattery().reduceDurability(this.getNumberOfEquipments());
     }
 
     @DoNotTouch
@@ -149,10 +198,36 @@ public class MineBot extends Robot implements Miner {
         return nextIndex + 2 + (tool == null ? 0 : 1);
     }
 
+    /**
+     * Uses the equipment at the specified index of the.
+     *
+     * @param index the index of the equipment to use
+     * @see UsableEquipment
+     */
     @StudentImplementationRequired("H5.4.4")
     @Override
     public void use(int index) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.4 - remove if implemented
+        Equipment[] equipments = this.getEquipments();
+        int countOfUsable = 0;
+        UsableEquipment foundEquipment = null;
+        for(Equipment currEquipment: equipments){
+            UsableEquipment tempUsable = settings.toUsableEquipment(currEquipment);
+            if(tempUsable != null ){
+                if(countOfUsable == index){
+                    foundEquipment = tempUsable;
+                    break;
+                }else{
+                    countOfUsable++;
+                }
+            }
+        }
+        if(foundEquipment != null){
+            foundEquipment.use(this);
+            if(foundEquipment.getName().equals("TelephotoLens")){
+                this.updateVision(this.getX(),this.getY(),this.getX(),this.getY());
+            }
+        }
+        settings.update();
     }
 
     @DoNotTouch
@@ -226,10 +301,48 @@ public class MineBot extends Robot implements Miner {
         return inventory;
     }
 
+    /**
+     * Performs a mining action in the direction this miner is facing if there is a mineable entity in front of it.
+     */
     @StudentImplementationRequired("H5.4.1")
     @Override
     public void mine() {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.1 - remove if implemented
+        Direction direction = this.getDirection();
+        Wall wall;
+        Mineable mineable;
+        //Check if the robot can use mine or not
+        if(direction == Direction.UP) {
+            if(this.getY()+1 >= World.getHeight()){return;}
+            wall = settings.getWallAt(this.getX(), this.getY(), true);
+            mineable = settings.getLootAt(this.getX(), this.getY() + 1);
+            if (wall != null || mineable == null) {return;}
+        }else if(direction == Direction.DOWN){
+            if(this.getY()-1 < 0){return;}
+            wall = settings.getWallAt(this.getX(), this.getY()-1, true);
+            mineable = settings.getLootAt(this.getX(), this.getY()-1);
+            if(wall != null || mineable == null) {return;}
+        }else if(direction == Direction.LEFT){
+            if(this.getX()-1 < 0){return;}
+            wall = settings.getWallAt(this.getX()-1, this.getY(), false);
+            mineable = settings.getLootAt(this.getX()-1,this.getY());
+            if(wall != null || mineable == null) {return;}
+        }else{
+            if(this.getX()+1 >= World.getWidth()){return;}
+            wall = settings.getWallAt(this.getX(), this.getY(), false);
+            mineable = settings.getLootAt(this.getX()+1, this.getY());
+            if(wall != null || mineable == null) {return;}
+        }
+        //check if it finished mining
+        boolean status = mineable.onMined(this.getTool());
+        boolean looted;
+        if(status){
+            //check if it is able to loot the mineable
+            looted = this.getInventory().add(mineable);
+            if(!looted){
+                this.crash();
+            }
+        }
+
     }
 
     @DoNotTouch

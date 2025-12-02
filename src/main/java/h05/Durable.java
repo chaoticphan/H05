@@ -11,7 +11,8 @@ import org.tudalgo.algoutils.student.annotation.DoNotTouch;
  * @author Nhan Huynh, Nico Schnieders
  */
 @DoNotTouch
-public interface Durable {
+public interface
+Durable {
 
     /**
      * Returns the current durability of this object.
